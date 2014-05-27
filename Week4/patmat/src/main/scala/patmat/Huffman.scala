@@ -81,8 +81,8 @@ object Huffman {
     def insert(bag: List[(Char, Int)], char: Char) : List[(Char, Int)] = { 
       def insert(bag: List[(Char, Int)], item: (Char, Int)) : List[(Char, Int)] = bag match {
         case List() => item :: Nil
-        case (_, x) :: xs if (x <= item._2) => item :: bag
-        case _ => bag.head :: insert(bag.tail, item)
+      	case (_, x) :: xs if (x > item._2) => item :: bag
+        case x :: xs => if (x._1 == char) insert(xs, item) else x :: insert(xs, item)
       }
       
       val repTimes = bag.count( x => x._1 == char)
@@ -106,7 +106,9 @@ object Huffman {
    * head of the list should have the smallest weight), where the weight
    * of a leaf is the frequency of the character.
    */
-  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = ???
+  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = {
+    new Leaf(freqs.head._1, freqs.head._2) :: makeOrderedLeafList(freqs.tail)
+  }
 
   /**
    * Checks whether the list `trees` contains only one single code tree.
