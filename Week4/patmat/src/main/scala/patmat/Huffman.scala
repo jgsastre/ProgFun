@@ -107,13 +107,13 @@ object Huffman {
    * of a leaf is the frequency of the character.
    */
   def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = {
-    new Leaf(freqs.head._1, freqs.head._2) :: makeOrderedLeafList(freqs.tail)
+    Leaf(freqs.head._1, freqs.head._2) :: makeOrderedLeafList(freqs.tail)
   }
 
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-  def singleton(trees: List[CodeTree]): Boolean = ???
+  def singleton(trees: List[CodeTree]): Boolean = trees.size == 1
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
@@ -127,7 +127,17 @@ object Huffman {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-  def combine(trees: List[CodeTree]): List[CodeTree] = ???
+  def combine(trees: List[CodeTree]): List[CodeTree] = {
+    def insert(trees: List[CodeTree], item: CodeTree): List[CodeTree] = trees match {
+      case List() => item :: Nil
+      case x :: xs => if (weight(x) <= weight(item)) item :: trees else x :: insert(xs, item)
+    }
+    
+    trees match {
+      case x if singleton(x) => trees
+      case x :: y :: xs => makeCodeTree(x, y) :: combine(xs)
+    }
+  }
 
   /**
    * This function will be called in the following way:
