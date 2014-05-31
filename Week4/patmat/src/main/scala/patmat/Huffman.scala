@@ -108,7 +108,7 @@ object Huffman {
    */
   def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = freqs match {
     case List() => Nil
-    case (x, y) :: xs => Leaf(x, y) :: makeOrderedLeafList(freqs.tail)
+    case (x, y) :: xs => Leaf(x, y) :: makeOrderedLeafList(xs)
   }
 
   /**
@@ -131,7 +131,7 @@ object Huffman {
   def combine(trees: List[CodeTree]): List[CodeTree] = {
     def insert(trees: List[CodeTree], item: CodeTree): List[CodeTree] = trees match {
       case List() => item :: Nil
-      case x :: xs => if (weight(x) <= weight(item)) item :: trees else x :: insert(xs, item)
+      case x :: xs => if (weight(x) >= weight(item)) item :: trees else x :: insert(xs, item)
     }
     
     trees match {
