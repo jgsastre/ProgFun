@@ -1,6 +1,7 @@
 package patmat
 
 import common._
+import scala.util.control.Exception
 
 /**
  * Assignment 4: Huffman coding
@@ -187,7 +188,13 @@ object Huffman {
    * This function decodes the bit sequence `bits` using the code tree `tree` and returns
    * the resulting list of characters.
    */
-  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = ???
+  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
+    def innerDecode(branch: CodeTree, bits: List[Bit]): List[Char] = branch match {
+      case Fork(left, right, _, _) => if (bits.head == 0) innerDecode(left, bits.tail) else innerDecode(right, bits.tail)
+      case Leaf(char, _) => if (bits.isEmpty) char :: Nil else char :: innerDecode(tree, bits)
+    } 
+    innerDecode(tree, bits)
+  }
 
   /**
    * A Huffman coding tree for the French language.
@@ -205,7 +212,7 @@ object Huffman {
   /**
    * Write a function that returns the decoded secret
    */
-  def decodedSecret: List[Char] = ???
+  def decodedSecret: List[Char] = decode(frenchCode, secret)
 
 
 
@@ -215,7 +222,20 @@ object Huffman {
    * This function encodes `text` using the code tree `tree`
    * into a sequence of bits.
    */
-  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
+    def innerEncode(branch: CodeTree)(text: List[Char]): List[Bit] = {
+      text match {
+        case List() => Nil
+        case x :: xs => branch match {
+          case Fork(left, _, _, _) if (chars(left).contains(x)) => 0 :: innerEncode(left)(text)
+          case Fork(_, right, _, _) if (chars(right).contains(x)) => 1 :: innerEncode(right)(text)
+          case Leaf(`x`, _) => innerEncode(tree)(xs)
+          case _ => throw new Exception("Bad formated tree")
+        }
+      }  
+    }
+    innerEncode(tree)(text)
+  }
 
 
   // Part 4b: Encoding using code table
