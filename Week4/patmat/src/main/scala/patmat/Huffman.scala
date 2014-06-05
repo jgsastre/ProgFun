@@ -246,7 +246,11 @@ object Huffman {
    * This function returns the bit sequence that represents the character `char` in
    * the code table `table`.
    */
-  def codeBits(table: CodeTable)(char: Char): List[Bit] = ???
+  def codeBits(table: CodeTable)(char: Char): List[Bit] = table match {
+    case List() => throw new Exception("codeBits")
+    case (`char`, bitList) :: xs => bitList
+    case x :: xs => codeBits(xs)(char)
+  }
 
   /**
    * Given a code tree, create a code table which contains, for every character in the
@@ -256,14 +260,23 @@ object Huffman {
    * a valid code tree that can be represented as a code table. Using the code tables of the
    * sub-trees, think of how to build the code table for the entire tree.
    */
-  def convert(tree: CodeTree): CodeTable = ???
+  def convert(tree: CodeTree): CodeTable = {
+    def innerConvert(branch: CodeTree, bag: List[Bit]) : CodeTable = branch match {
+      case Fork(left, right, _, _) => innerConvert(left, 0 :: bag) ::: innerConvert(right, 1 :: bag)
+      case Leaf(x, _) => List((x, bag))
+    }
+    innerConvert(tree, Nil)
+  }
 
   /**
    * This function takes two code tables and merges them into one. Depending on how you
    * use it in the `convert` method above, this merge method might also do some transformations
    * on the two parameter code tables.
    */
-  def mergeCodeTables(a: CodeTable, b: CodeTable): CodeTable = ???
+  def mergeCodeTables(a: CodeTable, b: CodeTable): CodeTable = a match {
+    case List() => b
+    case x :: xs => x :: mergeCodeTables(xs, b)
+  }
 
   /**
    * This function encodes `text` according to the code tree `tree`.
@@ -271,5 +284,16 @@ object Huffman {
    * To speed up the encoding process, it first converts the code tree to a code table
    * and then uses it to perform the actual encoding.
    */
-  def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+  def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = {
+    def innerQuickEncode(table: CodeTable, text: List[Char]): List[Bit] = text match {
+      case List() => List()
+      case x :: xs => {
+        val item = table.find( _._1 == x)
+        if (!item.isEmpty) item.get._2 ::: innerQuickEncode(table, xs)
+        else throw new Exception("quickEncode")
+      }
+    }
+  
+    innerQuickEncode(convert(tree), text)
+  }
 }
