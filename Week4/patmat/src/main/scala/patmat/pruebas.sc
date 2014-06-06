@@ -29,6 +29,7 @@ object pruebas {
                                                   //| (b,2)
                                                   //| (c,3)
 
-
+val a = List(1,2,3,4)                             //> a  : List[Int] = List(1, 2, 3, 4)
+val b = a :+ 5                                    //> b  : List[Int] = List(1, 2, 3, 4, 5)
 
 }
