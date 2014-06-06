@@ -79,15 +79,10 @@ object Huffman {
    *   }
    */
   def times(chars: List[Char]): List[(Char, Int)] = {
-    def insert(bag: List[(Char, Int)], char: Char) : List[(Char, Int)] = { 
-      def insert(bag: List[(Char, Int)], item: (Char, Int)) : List[(Char, Int)] = bag match {
-        case List() => item :: Nil
-      	case (_, x) :: xs if (x > item._2) => item :: bag
-        case x :: xs => if (x._1 == char) insert(xs, item) else x :: insert(xs, item)
-      }
-      
-      val repTimes = bag.count( x => x._1 == char)
-      insert(bag, (char, repTimes + 1))
+    def insert(bag: List[(Char, Int)], char: Char) : List[(Char, Int)] =  bag match{ 
+        case List() => (char, 1) :: Nil
+      	case (`char`, x) :: xs => (char, x + 1) :: xs
+        case x :: xs => x :: insert(xs, char)
     }
     
     def times(bag: List[(Char, Int)], chars: List[Char]): List[(Char,Int)] = chars match {
@@ -142,6 +137,7 @@ object Huffman {
     }
     
     trees match {
+      case List() => Nil
       case x if singleton(x) => trees
       case x :: y :: xs => insert(xs, makeCodeTree(x, y))
     }
@@ -262,7 +258,8 @@ object Huffman {
    */
   def convert(tree: CodeTree): CodeTable = {
     def innerConvert(branch: CodeTree, bag: List[Bit]) : CodeTable = branch match {
-      case Fork(left, right, _, _) => innerConvert(left, 0 :: bag) ::: innerConvert(right, 1 :: bag)
+      case Fork(left, right, _, _) => mergeCodeTables(innerConvert(left, bag :+ 0), 
+          innerConvert(right, bag :+ 1))
       case Leaf(x, _) => List((x, bag))
     }
     innerConvert(tree, Nil)
