@@ -54,4 +54,28 @@ class HuffmanSuite extends FunSuite {
   test("test times function") {
     println(times(string2Chars("hello, world")))
   }
+  
+  test("test times of some word") {
+    assert(times(string2Chars("abrkdabrkabraba")) === List(('a',5), ('b',4), ('r',3), ('k',2), ('d',1)))
+  }
+  
+  test("combine of a singleton or nil") {
+    combine(Nil)
+  }
+  
+  test("quick encode gives the correct byte sequence") {
+    val testSentence = "ture from 45 BC, making it over 2000 years old. Richard Mc"
+    val codeTree = createCodeTree(testSentence.toList)
+    assert(encode(codeTree)(testSentence.toList) === quickEncode(codeTree)(testSentence.toList))
+  }
+  
+  test("decode and quick encode is identity") {
+    val testSentence = "ture from 45 BC, making it over 2000 years old. Richard Mc"
+    val codeTree = createCodeTree(testSentence.toList)
+    assert(decode(codeTree, quickEncode(codeTree)(testSentence.toList)) === 
+      List('t', 'u', 'r', 'e', ' ', 'f', 'r', 'o', 'm', ' ', '4', '5', ' ', 'B', 'C', ',', ' ', 'm', 'a', 'k', 'i', 'n', 'g', ' ', 'i', 't', ' ', 'o', 'v', 'e', 'r', ' ', '2', '0', '0', '0', ' ', 'y', 'e', 'a', 'r', 's', ' ', 'o', 'l', 'd', '.', ' ', 'R', 'i', 'c', 'h', 'a', 'r', 'd', ' ', 'M', 'c'))
+  }
+  
+  
+  
 }
