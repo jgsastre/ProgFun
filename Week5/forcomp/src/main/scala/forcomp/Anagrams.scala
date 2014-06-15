@@ -95,11 +95,12 @@ object Anagrams {
    val seed = occurrences map { 
      case (char, times) => (for(i <- 1 until times) yield (char, i)).toList 
    }
-   seed foldLeft(Nil)( 
-       (head : (Char, Int), tail : Occurrences) => for {
-         case (char, times) <- head
-         i <- 
-       })
+   seed.foldLeft(List[Occurrences]())( 
+       (prefix : List[Occurrences], sufix : List[Occurrences]) => for {
+         base : Occurrences <- prefix
+         new_element <- sufix
+       } yield new_element :: base)
+     Nil
    }
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
