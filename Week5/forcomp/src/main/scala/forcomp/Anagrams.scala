@@ -92,15 +92,15 @@ object Anagrams {
    *  in the example above could have been displayed in some other order.
    */
   def combinations(occurrences: Occurrences): List[Occurrences] = {
-   val seed = occurrences map { 
-     case (char, times) => (for(i <- 1 until times) yield (char, i)).toList 
-   }
-   seed.foldLeft(List[Occurrences]())( 
-       (prefix : List[Occurrences], sufix : List[Occurrences]) => for {
-         base : Occurrences <- prefix
-         new_element <- sufix
-       } yield new_element :: base)
-     Nil
+    val seed = occurrences map { 
+      case (char, times) => (for(i <- 1 to times) yield (char, i)).toList 
+    }
+    val initValue : List[Occurrences] = List(List())
+    seed.foldLeft(List[Occurrences](List()))(
+      (prefix : List[Occurrences], sufix : Occurrences) => (for {
+        base <- prefix
+        new_element  <- sufix
+      } yield base :+ new_element) ::: prefix) 
    }
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
