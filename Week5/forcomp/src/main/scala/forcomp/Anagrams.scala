@@ -99,7 +99,7 @@ object Anagrams {
     seed.foldLeft(List[Occurrences](List()))(
       (prefix : List[Occurrences], sufix : Occurrences) => (for {
         base <- prefix
-        new_element  <- sufix
+        new_element <- sufix
       } yield base :+ new_element) ::: prefix) 
    }
 
@@ -113,7 +113,16 @@ object Anagrams {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = ???
+  def subtract(x: Occurrences, y: Occurrences): Occurrences = y match {
+    case List() => x
+    case (y_char, y_times) :: ys => {
+      val new_x = for {
+        (x_char, x_times) <- x 
+        if x_char != y_char || x_times > y_times
+      } yield (if (y_char != x_char) (x_char, x_times) else (x_char, x_times - y_times))
+      subtract(new_x, ys)
+    }
+  }
 
   /** Returns a list of all anagram sentences of the given sentence.
    *  
