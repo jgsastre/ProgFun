@@ -93,14 +93,13 @@ object Anagrams {
    */
   def combinations(occurrences: Occurrences): List[Occurrences] = {
    val seed = occurrences map { 
-     case (char, times) => (for(i <- 1 until times) yield (char, i)).toList 
+     case (char, times) => (for(i <- 1 to times) yield (char, i)).toList 
    }
-   seed.foldLeft(List[Occurrences]())( 
-       (prefix : List[Occurrences], sufix : List[Occurrences]) => for {
-         base : Occurrences <- prefix
+   seed.foldLeft(List[Occurrences](List()))( 
+       (prefix : List[Occurrences], sufix : Occurrences) => (for {
+         base <- Nil :: prefix
          new_element <- sufix
-       } yield new_element :: base)
-     Nil
+       } yield base :+ new_element) ::: prefix)
    }
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
@@ -113,7 +112,17 @@ object Anagrams {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = ???
+  def subtract(x: Occurrences, y: Occurrences): Occurrences = y match {
+    case List() => x
+    case (y_char, y_times) :: ys => {
+      val new_x = for {
+        (x_char, x_times) <- x
+        if x_char != y_char || x_times > y_times
+      } yield if (x_char != y_char) (x_char, x_times) else (x_char, x_times - y_times)
+      
+      subtract(new_x, ys)
+    }
+  }
 
   /** Returns a list of all anagram sentences of the given sentence.
    *  
@@ -155,6 +164,18 @@ object Anagrams {
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def sentenceAnagrams(sentence: Sentence): List[Sentence] = ???
-
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
+    def sentenceAnagrams(occurrences: Occurrences): List[Sentence] = {
+      if (occurrences.isEmpty) List(List())
+      else {
+        for {
+          x <- combinations(occurrences)
+          if dictionaryByOccurrences.contains(x)
+          word <- dictionaryByOccurrences(x)
+          aux_sentence <- sentenceAnagrams(subtract(occurrences, x))
+        } yield word :: aux_sentence
+      }
+    }
+    sentenceAnagrams(sentenceOccurrences(sentence))
+  }
 }
